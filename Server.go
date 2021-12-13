@@ -10,7 +10,7 @@ import (
 )
 
 func rpc_map(part string, cli *rpc.Client){
-	var reply string
+	var reply map[string]int
 	cli.Call("API.FirstTry", part, &reply)
 	fmt.Println(reply)
 }

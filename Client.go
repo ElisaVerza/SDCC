@@ -1,6 +1,8 @@
 package main
 
 import (
+	"regexp"
+	"strings"
 	"log"
 	"net"
 	"net/http"
@@ -20,12 +22,21 @@ func isError(err error) bool {
     return (err != nil)
 }
 
-func (a *API) FirstTry(i string, reply *string) error {
-    var str string
-	str = "Ciao"
-	i = i+str
-	fmt.Println("Ciau")
-    *reply = string(i)
+func (a *API) FirstTry(i string, reply *map[string]int) error {
+
+    reg, err := regexp.Compile(`[^\w]`)
+	if err != nil {
+        log.Fatal(err)
+    }
+    str := reg.ReplaceAllString(i, " ")
+	str = strings.ToLower(str)
+	
+    arrayString := strings.Fields(str)
+	dict:= make(map[string]int)
+    for _ , num :=  range arrayString {
+        dict[num] = dict[num]+1
+    }
+    *reply = dict
 	return nil
 }
 

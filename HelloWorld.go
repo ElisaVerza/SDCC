@@ -5,7 +5,9 @@ package main
 import (
 	"strings"
     "fmt"
+	"log"
     "os"
+	"regexp"
 )
 
 var path = "testo.txt"
@@ -23,8 +25,15 @@ func main() {
     if isError(err) {
         return
     }
-	lowerString := strings.ToLower(string(file))
-    arrayString := strings.Fields(lowerString)
+	
+	reg, err := regexp.Compile(`[^\w]`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    str := reg.ReplaceAllString(string(file), " ")
+	str = strings.ToLower(str)
+	
+    arrayString := strings.Fields(str)
 	dict:= make(map[string]int)
     for _ , num :=  range arrayString {
         dict[num] = dict[num]+1

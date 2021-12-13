@@ -9,14 +9,14 @@ import (
     "os"
 )
 
-func rpc_map(part string, cli *rpc.Client){
+func rpc_map(part string, cli *rpc.Client, c chan map[string]int){
 	var reply map[string]int
 	cli.Call("API.FirstTry", part, &reply)
-	fmt.Println(reply)
+	c <- reply
 }
 
 func Divide(path string, cli[]*rpc.Client){
-	
+	c := make(chan map[string]int)
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatalf("failed to open")
@@ -31,7 +31,7 @@ func Divide(path string, cli[]*rpc.Client){
 	file.Close()
 	j:=0
 	for i:=0; i<len(cli); i++{
-		go rpc_map(text[j], cli[i])
+		go rpc_map(text[j], cli[i], c)
 		if i==(len(cli)-1) && j!=len(text){
 			i = 0
 		}else if j == (len(text)-1){
@@ -39,6 +39,11 @@ func Divide(path string, cli[]*rpc.Client){
 		}
 		j++
 	}
+	x, y, z := <-c, <-c, <-c
+	fmt.Println(x)
+	fmt.Println(y)
+	fmt.Println(z)
+
 	for{}
 }
 

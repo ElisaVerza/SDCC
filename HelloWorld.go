@@ -26,7 +26,7 @@ func main() {
         return
     }
 	
-	reg, err := regexp.Compile(`[^\w]`)
+	reg, err := regexp.Compile(`[^\d\p{Latin}]`)
     if err != nil {
         log.Fatal(err)
     }

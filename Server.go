@@ -12,10 +12,13 @@ import (
 func rpc_map(part string, cli *rpc.Client, c chan map[string]int){
 	var reply map[string]int
 	cli.Call("API.FirstTry", part, &reply)
+	fmt.Println(reply)
 	c <- reply
 }
 
 func Divide(path string, cli[]*rpc.Client){
+	var text []string
+	nodes := len(cli) 
 	c := make(chan map[string]int)
 	file, err := os.Open(path)
 	if err != nil {
@@ -24,26 +27,27 @@ func Divide(path string, cli[]*rpc.Client){
 	}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
-	var text []string
 	for scanner.Scan() {
 		text = append(text, scanner.Text())
 	}
+	chunk := len(text)
 	file.Close()
 	j:=0
-	for i:=0; i<len(cli); i++{
+	for i:=0; i<nodes; i++{
 		go rpc_map(text[j], cli[i], c)
-		if i==(len(cli)-1) && j!=len(text){
+		if i==(nodes-1) && j!=chunk{
 			i = 0
-		}else if j == (len(text)-1){
+		}else if j == (chunk-1){
 			break
 		}
 		j++
 	}
-	x, y, z := <-c, <-c, <-c
-	fmt.Println(x)
-	fmt.Println(y)
-	fmt.Println(z)
-
+	for {
+		x, y, z := <-c, <-c, <-c
+		fmt.Println("main", x)
+		fmt.Println("main", y)
+		fmt.Println("main", z)
+	}
 	for{}
 }
 

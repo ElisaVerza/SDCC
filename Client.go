@@ -24,7 +24,7 @@ func isError(err error) bool {
 
 func (a *API) FirstTry(i string, reply *map[string]int) error {
 
-    reg, err := regexp.Compile(`[^\w]`)
+    reg, err := regexp.Compile(`[^\d\p{Latin}]`)
 	if err != nil {
         log.Fatal(err)
     }

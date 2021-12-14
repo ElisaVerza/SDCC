@@ -38,5 +38,4 @@ func main() {
     for _ , num :=  range arrayString {
         dict[num] = dict[num]+1
     }
-    fmt.Println(dict)
 }

@@ -11,8 +11,20 @@ import (
     "os"
 )
 
+type Word struct {
+    Key string
+    Value []int
+}
+
+type WordCounted struct {
+    KeyFinal string
+    ValueCounted int
+}
+var path string
+
 /*API needed for rpc calls*/
 type API int
+type Arith int
 
 
 func isError(err error) bool {
@@ -22,7 +34,33 @@ func isError(err error) bool {
     return (err != nil)
 }
 
-func (a *API) FirstTry(i string, reply *map[string]int) error {
+func (a *API) Reducer(w Word, reply *WordCounted) error {
+	var finalStruct WordCounted 
+	finalStruct.ValueCounted = 0
+	finalStruct = WordCounted{KeyFinal:w.Key}
+	/*f, err := os.Create(path)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer f.Close()*/
+	for i:=0; i<len(w.Value); i++{
+		/*_, err = f.WriteString(finalStruct.keyFinal)
+		_, err = f.WriteString(strconv.Itoa(finalStruct.valueCounted))
+
+		if err != nil {
+			log.Fatal(err)
+		}*/
+		finalStruct.ValueCounted += w.Value[i]
+	}
+    *reply = finalStruct 
+	return nil
+
+
+}
+
+
+func (a *API) Mapper(i string, reply *map[string]int) error {
 
     reg, err := regexp.Compile(`[^\d\p{Latin}]`)
 	if err != nil {
@@ -43,13 +81,10 @@ func (a *API) FirstTry(i string, reply *map[string]int) error {
 func main() {
 	var api = new(API)
 	err := rpc.Register(api)
+	path = os.Args[2]
 
 	if err != nil {
-		log.Fatal("Errore di connessione : ", err)
-	}
-
-	if err != nil {
-		log.Fatal("Errore nella registrazione delle API", err)
+		log.Fatal("Errore nella registrazione mapper", err)
 	}
 
 	/*Consumer is listening for calls*/

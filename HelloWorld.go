@@ -3,14 +3,16 @@
 package main
 
 import (
-	"strings"
     "fmt"
 	"log"
     "os"
-	"regexp"
+	"strconv"
 )
 
-var path = "testo.txt"
+type wordCounted struct {
+    keyFinal string
+    valueCounted int
+}
 
 func isError(err error) bool {
     if err != nil {
@@ -20,22 +22,23 @@ func isError(err error) bool {
 }
 
 func main() {
-    fmt.Println("Opening a file ")
-    var file, err = os.ReadFile(path)
-    if isError(err) {
-        return
-    }
-	
-	reg, err := regexp.Compile(`[^\d\p{Latin}]`)
+	var finalStruct wordCounted 
+	finalStruct.valueCounted = 0
+	finalStruct.keyFinal = "Ciao"
+	f, err := os.Create("c1.txt")
     if err != nil {
         log.Fatal(err)
     }
-    str := reg.ReplaceAllString(string(file), " ")
-	str = strings.ToLower(str)
-	
-    arrayString := strings.Fields(str)
-	dict:= make(map[string]int)
-    for _ , num :=  range arrayString {
-        dict[num] = dict[num]+1
-    }
+
+    defer f.Close()
+	for i:=0; i<10; i++{
+		_, err = f.WriteString(finalStruct.keyFinal)
+		_, err = f.WriteString(strconv.Itoa(finalStruct.valueCounted))
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		finalStruct.valueCounted += i
+	}
+	return
 }

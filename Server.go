@@ -9,16 +9,29 @@ import (
     "os"
 )
 
+
+	
+type Word struct {
+    Key string
+    Value []int
+}
+
+type WordCounted struct {
+    KeyFinal string
+    ValueCounted int
+}
+
 func rpc_map(part string, cli *rpc.Client, c chan map[string]int){
 	var reply map[string]int
-	cli.Call("API.FirstTry", part, &reply)
+	cli.Call("API.Mapper", part, &reply)
 	//fmt.Println(reply)
 	c <- reply
 }
 
-func Divide(path string, cli[]*rpc.Client){
+func Divide(path string, cli[]*rpc.Client){	
 	var text []string
-	mapResult1:= make(map[string]int)
+	var reply WordCounted
+	sorter:= make(map[string][]int)
 
 	nodes := len(cli) 
 	c := make(chan map[string]int)
@@ -47,15 +60,24 @@ func Divide(path string, cli[]*rpc.Client){
 		}
 		j++
 	}
-//Creazione silce con tutte le map dei mapper
-	for{
+//Map con key la parola e value una slice con tutte la occorrenze della parola trovata dai mapper (non sommate)
+	for i:=0; i<chunk; i++{
 		mapResult := <-c
-		for key , _/*value*/ :=  range mapResult {
-			fmt.Println(key)
-			mapResult1[key] = 1234//mapResult1[key].append(value)
+		for key , value :=  range mapResult {
+			sorter[key] = append(sorter[key], value)
 		}
-		fmt.Println(mapResult1)
+	}
+	count:=0
+	for k , v := range sorter{
+		nodeWord := Word{Key:k, Value:v}
+		if count==(nodes-1){
+			count = 0
+		}
+		rpcCli := cli[count]
+		rpcCli.Call("API.Reducer", nodeWord, &reply)
+		count++
 
+		fmt.Println(reply.ValueCounted)
 	}
 
 }

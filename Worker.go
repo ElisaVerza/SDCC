@@ -20,11 +20,8 @@ type WordCounted struct {
     KeyFinal string
     ValueCounted int
 }
-var path string
 
-/*API needed for rpc calls*/
 type API int
-type Arith int
 
 
 func isError(err error) bool {
@@ -34,23 +31,16 @@ func isError(err error) bool {
     return (err != nil)
 }
 
+//Funzione che esegue la fase di reduce, prende in input una struct che ha come key un parola
+//e come value una lista con tutte le occorrenze da sommare della parola.
 func (a *API) Reducer(w Word, reply *WordCounted) error {
+
 	var finalStruct WordCounted 
 	finalStruct.ValueCounted = 0
 	finalStruct = WordCounted{KeyFinal:w.Key}
-	/*f, err := os.Create(path)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    defer f.Close()*/
+	
+//Somma tutti i valori nella lista, restituisce una struct con key la parola e value la somma finale
 	for i:=0; i<len(w.Value); i++{
-		/*_, err = f.WriteString(finalStruct.keyFinal)
-		_, err = f.WriteString(strconv.Itoa(finalStruct.valueCounted))
-
-		if err != nil {
-			log.Fatal(err)
-		}*/
 		finalStruct.ValueCounted += w.Value[i]
 	}
     *reply = finalStruct 
@@ -59,16 +49,18 @@ func (a *API) Reducer(w Word, reply *WordCounted) error {
 
 }
 
-
+//Funzione che esegue la fase di map, prende come input la stringa da analizzare
 func (a *API) Mapper(i string, reply *map[string]int) error {
-
+	
+//Formattazione del testo
     reg, err := regexp.Compile(`[^\d\p{Latin}]`)
 	if err != nil {
         log.Fatal(err)
     }
     str := reg.ReplaceAllString(i, " ")
 	str = strings.ToLower(str)
-	
+
+//Creazione map con key la parola e value il numero di volte che che compare nel proprio chunk
     arrayString := strings.Fields(str)
 	dict:= make(map[string]int)
     for _ , num :=  range arrayString {
@@ -78,24 +70,24 @@ func (a *API) Mapper(i string, reply *map[string]int) error {
 	return nil
 }
 
+
 func main() {
 	var api = new(API)
 	err := rpc.Register(api)
-	path = os.Args[2]
 
 	if err != nil {
 		log.Fatal("Errore nella registrazione mapper", err)
 	}
 
-	/*Consumer is listening for calls*/
+//Consumer in attesa di ricevere chiamate rpc
 	rpc.HandleHTTP()
 
 	listener, err := net.Listen("tcp", string(os.Args[1]))
 	if err != nil {
-		log.Fatal("errore nella registrazione del server", err)
+		log.Fatal("Errore nella registrazione listener", err)
 	}
 
-	log.Printf("serving rpc sulla porta %s", string(os.Args[1]))
+	log.Printf("Serving rpc sulla porta %s", string(os.Args[1]))
 	err = http.Serve(listener, nil)
 	if err != nil {
 		log.Fatal("Errore in serving : ", err)
